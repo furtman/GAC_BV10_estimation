@@ -1,0 +1,2 @@
+# GAC_BV10_estimation
+This repository contains a database of microprollutants breakthrough in granular activated carbon (GAC), and was developed as a part of a research that was supported in part by the National Institute for Environmental Health Sciences Superfund Research Program (1P42ES031009-01), the North Carolina Policy Collaborative through an appropriation from the North Carolina General Assembly, and North Carolina State University.
