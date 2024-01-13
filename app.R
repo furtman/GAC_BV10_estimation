@@ -12,7 +12,8 @@ library(gbm)
 #library(ranger)
 library(tidyverse)
 library(shinythemes)
-load(file="final_gbm_122923.rda")
+final_gbm<-readRDS(file="gbm1.rds")
+#load(file="final_gbm_010224.rda")
 #load(file="final_rf.rda")
 load(file="mp_ratio_tbl.rda")
 load(file="empty_tbl.rda")
@@ -25,21 +26,21 @@ ui <- shinyUI(
         titlePanel(h1("Pilot/full scale BV10 estimation for recalcitrant organic micropollutant (MP) removal by GAC",
                       style="font-size:45px;font-weight: bold;")),
         sidebarLayout(sidebarPanel(
-            numericInput("DOC", label="DOC (mg/L) of water matrix",value=0.1,min=0.1,max=11.4) ,
-            numericInput("pH", label="pH of water matrix",value=7,min=0) ,
-            numericInput("UV254", label="UV254 (abs/cm) of water matrix",value=0.05,min=0,max=0.248) ,
-            numericInput("C0", label="Initial MP concentration (ug/L)",value=0.05,min=0) ,
+            numericInput("DOC", label="DOC (mg/L) of water matrix",value=2.7,min=0.1,max=11.4) ,
+            numericInput("pH", label="pH of water matrix",value=7.56,min=0) ,
+            numericInput("UV254", label="UV254 (abs/cm) of water matrix",value=0.0259,min=0,max=0.248) ,
+            numericInput("C0", label="Initial MP concentration (ug/L)",value=0.0216,min=0) ,
             numericInput("charge", label="Charge of MP at specified pH",value=-1, min=-1) ,
-            numericInput("L", label="Abraham param. L",value=2,min=1) ,
-            numericInput("B", label="Abraham param. B",value=2,min=0) ,
-            numericInput("E", label="Abraham param. E",value=2,min=-1.5) ,
-            numericInput("S", label="Abraham param. S",value=2,min=-.9) ,
-            numericInput("A", label="Abraham param. A",value=2,min=0) ,
-            numericInput("V", label="Abraham param. V",value=2,min=0.6) ,
-            numericInput("BET", label="BET (m2/g) pf GAC",value=700,min=573, max=1468) ,
-            numericInput("pzc", label="pzc of GAC",value=7,min=5.5,max=10) ,
-            numericInput("mp_ratio", label="Micropore to total pore volume ratio of GAC",value=0.5,min=0,max=1) ,
-            numericInput("EBCT", label="Empty bed contact time (min)",value=7,min=4.6,max=24),
+            numericInput("L", label="Abraham param. L",value=3.297,min=1) ,
+            numericInput("B", label="Abraham param. B",value=0.33,min=0) ,
+            numericInput("E", label="Abraham param. E",value=-0.88,min=-1.5) ,
+            numericInput("S", label="Abraham param. S",value=-0.39,min=-.9) ,
+            numericInput("A", label="Abraham param. A",value=0.46,min=0) ,
+            numericInput("V", label="Abraham param. V",value=1.5757,min=0.6) ,
+            numericInput("BET", label="BET (m2/g) pf GAC",value=1132,min=573, max=1468) ,
+            numericInput("pzc", label="pzc of GAC",value=7.4,min=5.4,max=10) ,
+            numericInput("mp_ratio", label="Micropore to total pore volume ratio of GAC",value=0.87,min=0,max=1) ,
+            numericInput("EBCT", label="Empty bed contact time (min)",value=10,min=4.6,max=24),
             br(),
             actionButton("goButton", "Calculate"),
             p("Click to simulate BV10."),
@@ -73,7 +74,7 @@ ui <- shinyUI(
                              p("This project is deveoped by Yoko Koyama (North Carolina State University, herein NCSU), 
                                Detlef. R. U. Knappe, Ph.D (NCSU), Mohammad A. Khaksar Fasaee (NCSU), Emily Zechman Berglund, Ph.D (NCSU)", style="text-indent: 2em;font-size:20px;"),
                              h3("Contact:"),
-                             p("Please direct your questions to Yoko Koyama (ykoyama3@ncsu.edu) regarding this project.", style="text-indent: 2em;font-size:20px;")
+                             p("Please direct your questions to Yoko Koyama (ykoyama3@alumni.ncsu.edu) regarding this project.", style="text-indent: 2em;font-size:20px;")
                              
                          )),
                 tabPanel("GBM output",
@@ -163,12 +164,12 @@ ui <- shinyUI(
 server <- function(input, output,session) {
     ntext <- eventReactive(input$goButton, {
         newdt<-data.frame(DOC=input$DOC, pH=input$pH, 
-                          #UV254=input$UV254, 
+                          UV254=input$UV254, 
                           C0=input$C0, charge=input$charge,
                           L=input$L, B=input$B,E=input$E, S=input$S, A=input$A, V=input$V,
                           BET=input$BET, pzc=input$pzc, mp_ratio=input$mp_ratio, EBCT=input$EBCT, CD=0,PD=0)
         logbv10<-predict(final_gbm ,newdt)
-        predicted<-10^logbv10
+        predicted<-round(10^logbv10,-3)
         
         return(predicted)
     }
@@ -191,12 +192,12 @@ server <- function(input, output,session) {
     values$df <- result
     observeEvent(input$goButton2, {
         newdt<-data.frame(DOC=input$DOC, pH=input$pH,
-                          #UV254=input$UV254, 
+                          UV254=input$UV254, 
                           C0=input$C0, charge=input$charge,
                           L=input$L, B=input$B,E=input$E, S=input$S, A=input$A, V=input$V,
                           BET=input$BET, pzc=input$pzc, mp_ratio=input$mp_ratio, EBCT=input$EBCT, CD=0,PD=0)
         logbv10<-predict(final_gbm ,newdt)
-        GBM_bv10<-round(10^logbv10,digits=0)
+        GBM_bv10<-round(10^logbv10,-3)
         # logbv10_2<-predict(final_rf ,newdt)$predictions
         # RF_bv10<-round(10^logbv10_2,digits=0)
         newRow<-cbind(newdt,GBM_bv10)
@@ -206,14 +207,14 @@ server <- function(input, output,session) {
     }  )
     
     output$txt<-renderText({
-        paste( "Estimated BV10 by gradient boosting machine (GBM) model is " )
+        paste( "Estimated BV10 by gradient boosting machine (GBM) model, rounded to nearest 1000s is " )
     })
     output$bv10_value<-renderText({
         ntext()
     })
-    output$txt2<-renderText({
-        paste( "Estimated BV10 by random forest (RF) model is " )
-    })
+    # output$txt2<-renderText({
+    #     paste( "Estimated BV10 by random forest (RF) model is " )
+    # })
     # output$bv10_value_2<-renderText({
     #     ntext2()
     # })
