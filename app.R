@@ -15,7 +15,8 @@ library(shinythemes)
 final_gbm<-readRDS(file="gbm1.rds")
 #load(file="final_gbm_010224.rda")
 #load(file="final_rf.rda")
-load(file="mp_ratio_tbl.rda")
+#load(file="mp_ratio_tbl.rda")
+mp_ratio_tbl<-read_csv("GAC_tbl.csv")
 load(file="empty_tbl.rda")
 # Define UI for application that draws a histogram
 ui <- shinyUI(
@@ -55,9 +56,9 @@ ui <- shinyUI(
                              br(),
                              h3("Web-app description:"),
                              p(" This web application is based on a manuscript 
-                             currently under preparation and provide two machine learning models to estimate early breakthrough of recalcitrant organic MPs in GAC. 
-                             A machine learning model based on gradient boosted machine (GBM) 
-                             is available for estimating bed volume to 10% breakthrough (BV10) of recalcitrant organic MPs. 
+                             currently under preparation and provide a machine learning model to estimate early breakthrough of recalcitrant organic MPs in GAC. 
+                             This machine learning model is based on gradient boosted machine (GBM) 
+                             which can be used for estimating bed volume to 10% breakthrough (BV10) of recalcitrant organic MPs. 
                              Users can easily estimate BV10 values under various conditions by entering a few water quality, 
                              MP property, and GAC characteristic parameters. The estimated BV10 value is shown on the tab, 
                              'GBM output'. Additionally, this web-app also provides a function for users to record the estimated BV10s along with the corresponding input parameters. 
